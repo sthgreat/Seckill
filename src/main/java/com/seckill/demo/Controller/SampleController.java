@@ -4,6 +4,7 @@ import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.UserService;
 import com.seckill.demo.domain.User;
+import com.seckill.demo.redis.RedisUtil;
 import org.apache.ibatis.annotations.Arg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +22,9 @@ public class SampleController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -46,13 +50,18 @@ public class SampleController {
 
     @RequestMapping("/redis/set")
     @ResponseBody
-    public void set(){
-        stringRedisTemplate.opsForValue().set("1234","kkl");
+    public Result<User> set(){
+        User user = new User();
+        user.setUserName("jsb");
+        user.setUserId(2);
+        redisTemplate.opsForValue().set("345",user);
+        User result = (User) redisTemplate.opsForValue().get("345");
+        return Result.success(result);
     }
 
     @RequestMapping("/redis/get")
     @ResponseBody
-    public String get(){
-        return stringRedisTemplate.opsForValue().get("1234");
+    public Result<User> get(){
+        return Result.success((User)redisUtil.get("2"));
     }
 }
