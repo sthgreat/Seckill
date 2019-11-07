@@ -22,6 +22,6 @@ public class Result<T> {
         if(msg == null){
             return null;
         }
-        return new Result<>(CodeMsg.SERVER_ERROR.getCode(),CodeMsg.SERVER_ERROR.getMsg(),null);
+        return new Result<>(msg.getCode(),msg.getMsg(),null);
     }
 }

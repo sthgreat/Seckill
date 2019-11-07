@@ -10,17 +10,21 @@ public class MD5Util {
     private static final String salt = "1a2b3c4d";
 
     public static String inputPassToFormPass(String inputPass){
-        String str = salt.charAt(0)+salt.charAt(3)+inputPass+salt.charAt(2)+salt.charAt(5);
+        String str = ""+salt.charAt(0)+salt.charAt(3)+ inputPass +salt.charAt(2)+salt.charAt(5);
         return md5(str);
     }
 
     public static String formPassToDBPass(String formPass, String salt){
-        String str = salt.charAt(0)+salt.charAt(3)+ formPass +salt.charAt(2)+salt.charAt(5);
+        String str = ""+salt.charAt(0)+salt.charAt(3)+ formPass +salt.charAt(2)+salt.charAt(5);
         return md5(str);
     }
 
     public static String inputPassToDbPass(String input, String saltDB){
         String formPass = inputPassToFormPass(input);
         return formPassToDBPass(formPass, saltDB);
+    }
+
+    public static void main(String[] args){
+        System.out.print(inputPassToDbPass("123456",salt));
     }
 }
