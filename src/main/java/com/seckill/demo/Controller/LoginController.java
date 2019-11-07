@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thymeleaf.util.StringUtils;
 
+import javax.validation.Valid;
+
 @Controller
 @RequestMapping("/login")
 public class LoginController {
@@ -30,18 +32,18 @@ public class LoginController {
 
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result<Boolean> doLogin(LoginVo loginVo){
-        String passInput = loginVo.getPassword();
-        String mobile = loginVo.getMobile();
-        if(StringUtils.isEmpty(passInput)){
-            return Result.error(CodeMsg.PASSWORD_EMPTY);
-        }
-        if(StringUtils.isEmpty(mobile)){
-            return Result.error(CodeMsg.MOBILE_EMPTY);
-        }
-        if(!ValidatorUtil.isMobile(mobile)){
-            return Result.error(CodeMsg.MOBILE_ERROR);
-        }
+    public Result<Boolean> doLogin(@Valid LoginVo loginVo){
+//        String passInput = loginVo.getPassword();
+//        String mobile = loginVo.getMobile();
+//        if(StringUtils.isEmpty(passInput)){
+//            return Result.error(CodeMsg.PASSWORD_EMPTY);
+//        }
+//        if(StringUtils.isEmpty(mobile)){
+//            return Result.error(CodeMsg.MOBILE_EMPTY);
+//        }
+//        if(!ValidatorUtil.isMobile(mobile)){
+//            return Result.error(CodeMsg.MOBILE_ERROR);
+//        }
         CodeMsg msg = miaoshaUserService.login(loginVo);
         if(msg.getCode() == 0){
             return Result.success(true);
