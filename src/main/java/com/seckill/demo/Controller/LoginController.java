@@ -44,11 +44,7 @@ public class LoginController {
 //        if(!ValidatorUtil.isMobile(mobile)){
 //            return Result.error(CodeMsg.MOBILE_ERROR);
 //        }
-        CodeMsg msg = miaoshaUserService.login(loginVo);
-        if(msg.getCode() == 0){
-            return Result.success(true);
-        }else {
-            return Result.error(msg);
-        }
+        miaoshaUserService.login(loginVo);
+        return Result.success(true);
     }
 }
