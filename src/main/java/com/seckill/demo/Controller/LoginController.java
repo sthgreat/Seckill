@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thymeleaf.util.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/login")
 public class LoginController {
-    private static Logger log = LoggerFactory.getLogger(LoginController.class);
+//    private static Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     private MiaoshaUserService miaoshaUserService;
@@ -32,7 +33,7 @@ public class LoginController {
 
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result<Boolean> doLogin(@Valid LoginVo loginVo){
+    public Result<Boolean> doLogin(@Valid LoginVo loginVo, HttpServletResponse response){
 //        String passInput = loginVo.getPassword();
 //        String mobile = loginVo.getMobile();
 //        if(StringUtils.isEmpty(passInput)){
@@ -44,7 +45,7 @@ public class LoginController {
 //        if(!ValidatorUtil.isMobile(mobile)){
 //            return Result.error(CodeMsg.MOBILE_ERROR);
 //        }
-        miaoshaUserService.login(loginVo);
+        miaoshaUserService.login(loginVo, response);
         return Result.success(true);
     }
 }

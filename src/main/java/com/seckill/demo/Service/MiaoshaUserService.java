@@ -3,28 +3,37 @@ package com.seckill.demo.Service;
 import com.seckill.demo.Controller.LoginController;
 import com.seckill.demo.Dao.MiaoshaUserDao;
 import com.seckill.demo.Result.CodeMsg;
-import com.seckill.demo.Result.Result;
 import com.seckill.demo.Utils.MD5Util;
+import com.seckill.demo.Utils.UUIDUtil;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.exception.GlobalException;
+import com.seckill.demo.redis.MiaoshaUserKey;
+import com.seckill.demo.redis.RedisService;
 import com.seckill.demo.vo.LoginVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @Service
 public class MiaoshaUserService {
-    private static Logger log = LoggerFactory.getLogger(LoginController.class);
+//    private static Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String COOKI_NAME_TOKEN = "token";
 
     @Autowired
     private MiaoshaUserDao miaoshaUserDao;
+
+    @Autowired
+    private RedisService redisService;
 
     public MiaoShaUser getById(Long id){
         return miaoshaUserDao.getById(id);
     }
 
-    public boolean login(LoginVo loginVo) {
+    public boolean login(LoginVo loginVo, HttpServletResponse response) {
         if(loginVo == null){
             throw new GlobalException(CodeMsg.SERVER_ERROR);
         }
@@ -42,6 +51,14 @@ public class MiaoshaUserService {
         if(!calcPass.equals(dbPass)){
             throw new GlobalException(CodeMsg.PASSWORD_ERROR);
         }
+        //生成cookie
+        String token = UUIDUtil.uuid();
+        redisService.set("token:"+token,user, (long) 300); //缓存5分钟
+        Cookie cookie = new Cookie(COOKI_NAME_TOKEN,token);
+        cookie.setMaxAge(300);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
         return true;
     }
 }
