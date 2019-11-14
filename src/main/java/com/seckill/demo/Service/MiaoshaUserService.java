@@ -1,19 +1,16 @@
 package com.seckill.demo.Service;
 
-import com.seckill.demo.Controller.LoginController;
 import com.seckill.demo.Dao.MiaoshaUserDao;
 import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Utils.MD5Util;
 import com.seckill.demo.Utils.UUIDUtil;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.exception.GlobalException;
-import com.seckill.demo.redis.MiaoshaUserKey;
 import com.seckill.demo.redis.RedisService;
 import com.seckill.demo.vo.LoginVo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -21,13 +18,20 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 public class MiaoshaUserService {
 //    private static Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String COOKI_NAME_TOKEN = "token";
+    public static final String COOKIE_NAME_TOKEN = "token";
 
     @Autowired
     private MiaoshaUserDao miaoshaUserDao;
 
     @Autowired
     private RedisService redisService;
+
+    public MiaoShaUser getByToken(String token) {
+        if(StringUtils.isEmpty(token)){
+            return null;
+        }
+        return (MiaoShaUser) redisService.get("token:"+token);
+    }
 
     public MiaoShaUser getById(Long id){
         return miaoshaUserDao.getById(id);
@@ -54,11 +58,10 @@ public class MiaoshaUserService {
         //生成cookie
         String token = UUIDUtil.uuid();
         redisService.set("token:"+token,user, (long) 300); //缓存5分钟
-        Cookie cookie = new Cookie(COOKI_NAME_TOKEN,token);
+        Cookie cookie = new Cookie(COOKIE_NAME_TOKEN,token);
         cookie.setMaxAge(300);
         cookie.setPath("/");
         response.addCookie(cookie);
-
         return true;
     }
 }

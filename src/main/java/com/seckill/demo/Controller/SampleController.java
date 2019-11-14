@@ -3,6 +3,7 @@ package com.seckill.demo.Controller;
 import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.UserService;
+import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.domain.User;
 import com.seckill.demo.redis.RedisUtil;
 import org.apache.ibatis.annotations.Arg;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.sql.Date;
 
 @Controller
 @RequestMapping("/demo")
