@@ -26,11 +26,15 @@ public class MiaoshaUserService {
     @Autowired
     private RedisService redisService;
 
-    public MiaoShaUser getByToken(String token) {
+    public MiaoShaUser getByToken(HttpServletResponse response, String token) {
         if(StringUtils.isEmpty(token)){
             return null;
         }
-        return (MiaoShaUser) redisService.get("token:"+token);
+        MiaoShaUser user = (MiaoShaUser) redisService.get("token:"+token);
+        if(user != null){
+            addCookie(response, user);
+        }
+        return user;
     }
 
     public MiaoShaUser getById(Long id){
@@ -55,13 +59,16 @@ public class MiaoshaUserService {
         if(!calcPass.equals(dbPass)){
             throw new GlobalException(CodeMsg.PASSWORD_ERROR);
         }
-        //生成cookie
+        addCookie(response, user);
+        return true;
+    }
+
+    private void addCookie(HttpServletResponse response, MiaoShaUser user){
         String token = UUIDUtil.uuid();
         redisService.set("token:"+token,user, (long) 300); //缓存5分钟
         Cookie cookie = new Cookie(COOKIE_NAME_TOKEN,token);
         cookie.setMaxAge(300);
         cookie.setPath("/");
         response.addCookie(cookie);
-        return true;
     }
 }
