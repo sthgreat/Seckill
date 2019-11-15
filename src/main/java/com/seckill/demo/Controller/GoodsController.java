@@ -28,8 +28,7 @@ public class GoodsController {
     private MiaoshaUserService miaoshaUserService;
 
     @RequestMapping("/to_list")
-    @ResponseBody
-    public Result<MiaoShaUser> toLogin(Model model, HttpServletRequest request,
+    public String toLogin(Model model, HttpServletRequest request,
                             @CurrentUser MiaoShaUser user
 //                          @CookieValue(value=MiaoshaUserService.COOKIE_NAME_TOKEN,required = false) String cookieToken,
 //                          @RequestParam(value = MiaoshaUserService.COOKIE_NAME_TOKEN,required = false) String paramToken
@@ -40,8 +39,10 @@ public class GoodsController {
 //        String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
 //        MiaoShaUser user = miaoshaUserService.getByToken(response, token);
         MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
+        if(user1 == null){ //未登录则返回登陆页面
+            return "login.html";
+        }
         model.addAttribute("user",user1);
-//        return "goods_list";
-        return Result.success(user1);
+        return "goods_list";
     }
 }
