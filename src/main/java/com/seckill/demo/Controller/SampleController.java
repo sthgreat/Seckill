@@ -2,10 +2,12 @@ package com.seckill.demo.Controller;
 
 import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Result.Result;
+import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.UserService;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.domain.User;
 import com.seckill.demo.redis.RedisUtil;
+import com.seckill.demo.vo.GoodsVo;
 import org.apache.ibatis.annotations.Arg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.Date;
+import java.util.List;
 
 @Controller
 @RequestMapping("/demo")
@@ -30,7 +33,7 @@ public class SampleController {
     private RedisUtil redisUtil;
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private GoodsService goodsService;
 
     @RequestMapping("/db/get")
     @ResponseBody
@@ -66,5 +69,16 @@ public class SampleController {
     @ResponseBody
     public Result<User> get(){
         return Result.success((User)redisUtil.get("2"));
+    }
+
+    @RequestMapping("/test")
+    @ResponseBody
+    public String test(){
+        List<GoodsVo> l = goodsService.listGoodsVo();
+        StringBuilder sb = new StringBuilder();
+        for(GoodsVo g:l){
+            sb.append(g.toString()).append("\n");
+        }
+        return sb.toString();
     }
 }

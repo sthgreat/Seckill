@@ -2,8 +2,10 @@ package com.seckill.demo.Controller;
 
 import com.seckill.demo.Interceptor.CurrentUser;
 import com.seckill.demo.Result.Result;
+import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.MiaoshaUserService;
 import com.seckill.demo.domain.MiaoShaUser;
+import com.seckill.demo.vo.GoodsVo;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Controller
 @RequestMapping("/goods")
@@ -26,6 +29,9 @@ public class GoodsController {
 
     @Autowired
     private MiaoshaUserService miaoshaUserService;
+
+    @Autowired
+    private GoodsService goodsService;
 
     @RequestMapping("/to_list")
     public String toLogin(Model model, HttpServletRequest request,
@@ -43,6 +49,9 @@ public class GoodsController {
             return "login.html";
         }
         model.addAttribute("user",user1);
+        //查询商品列表
+        List<GoodsVo> goodsList = goodsService.listGoodsVo();
+        model.addAttribute("goodsList",goodsList);
         return "goods_list";
     }
 }
