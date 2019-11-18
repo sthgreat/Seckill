@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,7 +21,7 @@ public class MiaoshaUserService {
 //    private static Logger log = LoggerFactory.getLogger(LoginController.class);
     public static final String COOKIE_NAME_TOKEN = "token";
 
-    @Autowired
+    @Resource
     private MiaoshaUserDao miaoshaUserDao;
 
     @Autowired

@@ -7,3 +7,5 @@ https://blog.csdn.net/songzehao/article/details/99641594 拦截器的使用
 
 使用mybatis进行联表查询（注解）：未开启驼峰映射时，使用results指定映射（不需要考虑表名）
 开启驼峰映射后会自动匹配（表名无影响，只看表名后面的字段）
+
+mysql数据插入后，id自动映射到原来的对象的id字段中

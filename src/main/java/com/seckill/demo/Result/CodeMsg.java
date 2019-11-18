@@ -33,5 +33,10 @@ public class CodeMsg {
 
     //商品模块 5003XX
 
+
     //订单模块 5004XX
+
+    //秒杀模块
+    public static CodeMsg Stock_Null = new CodeMsg(500500, "商品已经秒杀完毕");
+    public static CodeMsg NOMORE_MIAOSHA = new CodeMsg(500501,"不能重复秒杀");
 }

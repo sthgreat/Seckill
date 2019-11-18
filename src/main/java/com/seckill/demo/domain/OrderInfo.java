@@ -3,6 +3,7 @@ package com.seckill.demo.domain;
 import lombok.Data;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
 public class OrderInfo {
@@ -15,6 +16,6 @@ public class OrderInfo {
     private Double goodsPrice;
     private Integer orderChannel;
     private Integer status;
-    private Date createDate;
-    private Date payDate;
+    private Timestamp createDate;
+    private Timestamp payDate;
 }
