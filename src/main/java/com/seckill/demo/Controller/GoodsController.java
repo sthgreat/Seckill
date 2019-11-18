@@ -68,6 +68,7 @@ public class GoodsController {
         long startAt = goods.getStartDate().getTime();
         long endAt = goods.getEndDate().getTime();
         long now = System.currentTimeMillis();
+        log.info(startAt+" "+endAt+" "+ now);
 
         int miaoshaStatus = 0;
         int remainSec = 0;

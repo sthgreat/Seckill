@@ -4,6 +4,7 @@ import com.seckill.demo.domain.Goods;
 import lombok.Data;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
 public class GoodsVo {
@@ -16,6 +17,6 @@ public class GoodsVo {
     private Integer goodsStock;
     private Double miaoshaPrice;
     private Integer stockCount;
-    private Date startDate;
-    private Date endDate;
+    private Timestamp startDate;
+    private Timestamp endDate;
 }

@@ -74,11 +74,8 @@ public class SampleController {
     @RequestMapping("/test")
     @ResponseBody
     public String test(){
-        List<GoodsVo> l = goodsService.listGoodsVo();
-        StringBuilder sb = new StringBuilder();
-        for(GoodsVo g:l){
-            sb.append(g.toString()).append("\n");
-        }
-        return sb.toString();
+        GoodsVo g = goodsService.getGoodsVoByGoodsId(1);
+
+        return g.toString();
     }
 }
