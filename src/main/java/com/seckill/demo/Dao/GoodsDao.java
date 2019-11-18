@@ -1,10 +1,7 @@
 package com.seckill.demo.Dao;
 
 import com.seckill.demo.vo.GoodsVo;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.stereotype.Component;
 
@@ -27,4 +24,7 @@ public interface GoodsDao {
 //            @Result(column = "end_date",property = "endDate")
 //    })
     List<GoodsVo> listGoodsVo();
+
+    @Select("select g.*,mg.miaosha_price,mg.stock_count,mg.start_date,mg.end_date from miaosha_goods mg left join goods g on mg.id = g.id where g.id = #{id}")
+    GoodsVo getGoodsVoByGoodsId(@Param(value = "id") long goodsId);
 }

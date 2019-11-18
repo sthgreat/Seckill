@@ -6,16 +6,14 @@ import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.MiaoshaUserService;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.vo.GoodsVo;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,5 +51,40 @@ public class GoodsController {
         List<GoodsVo> goodsList = goodsService.listGoodsVo();
         model.addAttribute("goodsList",goodsList);
         return "goods_list";
+    }
+
+    @RequestMapping("/to_detail/{goodsId}")
+    public String detail(Model model, HttpServletRequest request,
+                         @PathVariable("goodsId") long goodsId){
+        MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
+        if(user1 == null){ //未登录则返回登陆页面
+            return "login.html";
+        }
+        model.addAttribute("user",user1);
+        //拿到商品的信息
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+        model.addAttribute("goods",goods);
+
+        long startAt = goods.getStartDate().getTime();
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();
+
+        int miaoshaStatus = 0;
+        int remainSec = 0;
+
+        if(now<startAt){//秒杀未开始
+            miaoshaStatus = 0;
+            remainSec = (int)(startAt - now)/1000;
+        }else if(now>endAt){//秒杀已经结束
+            miaoshaStatus = 2;
+            remainSec = -1;
+        }else {//秒杀进行中
+            miaoshaStatus = 1;
+            remainSec = 0;
+        }
+
+        model.addAttribute("miaoshaStatus",miaoshaStatus);
+        model.addAttribute("remainSeconds",remainSec);
+        return "goods_detail";
     }
 }
