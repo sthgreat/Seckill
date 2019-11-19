@@ -9,3 +9,7 @@ https://blog.csdn.net/songzehao/article/details/99641594 拦截器的使用
 开启驼峰映射后会自动匹配（表名无影响，只看表名后面的字段）
 
 mysql数据插入后，id自动映射到原来的对象的id字段中
+
+压测：qps每秒处理请求
+
+打war包与jar包：mvn clean package
