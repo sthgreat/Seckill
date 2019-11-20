@@ -39,7 +39,35 @@ public class MiaoshaUserService {
     }
 
     public MiaoShaUser getById(Long id){
-        return miaoshaUserDao.getById(id);
+        //取缓存
+        MiaoShaUser user = (MiaoShaUser) redisService.get("userId,"+id);
+        if(user!=null){
+            return user;
+        }
+        //取数据库
+        user = miaoshaUserDao.getById(id);
+        if(user!=null){
+            redisService.set("userId,"+id,user, (long) 0);
+        }
+        return user;
+    }
+
+    public boolean updatePassword(String token, Long id, String formPassword){
+        //取user
+        MiaoShaUser miaoShaUser = getById(id);
+        if(miaoShaUser==null){
+            throw new GlobalException(CodeMsg.MOBILE_NOT_EXIST);
+        }
+        //更新数据库
+        MiaoShaUser toBeUpdate = new MiaoShaUser();
+        toBeUpdate.setId(id);
+        toBeUpdate.setPassword(MD5Util.formPassToDBPass(formPassword,miaoShaUser.getSalt()));
+        miaoshaUserDao.update(toBeUpdate);
+        //更新缓存
+        redisService.delete("userId,"+id);
+        miaoShaUser.setPassword(toBeUpdate.getPassword());
+        redisService.set("token:"+token,miaoShaUser);
+        return true;
     }
 
     public String login(LoginVo loginVo, HttpServletResponse response) {

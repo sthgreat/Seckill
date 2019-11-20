@@ -1,6 +1,7 @@
 package com.seckill.demo.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -27,5 +28,10 @@ public class RedisService {//分库及其他操作
     public Object get(String key) {
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         return valueOperations.get(key);
+    }
+
+    public void delete(String key){
+        RedisOperations<String, Object> Operations = redisTemplate.opsForValue().getOperations();
+        Operations.delete(key);
     }
 }
