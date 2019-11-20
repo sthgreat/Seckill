@@ -33,7 +33,7 @@ public class LoginController {
 
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result<Boolean> doLogin(@Valid LoginVo loginVo, HttpServletResponse response){
+    public Result<String> doLogin(@Valid LoginVo loginVo, HttpServletResponse response){
 //        String passInput = loginVo.getPassword();
 //        String mobile = loginVo.getMobile();
 //        if(StringUtils.isEmpty(passInput)){
@@ -45,7 +45,7 @@ public class LoginController {
 //        if(!ValidatorUtil.isMobile(mobile)){
 //            return Result.error(CodeMsg.MOBILE_ERROR);
 //        }
-        miaoshaUserService.login(loginVo, response);
-        return Result.success(true);
+        String token = miaoshaUserService.login(loginVo, response);
+        return Result.success(token);
     }
 }

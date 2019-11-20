@@ -5,6 +5,7 @@ import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.MiaoshaUserService;
 import com.seckill.demo.domain.MiaoShaUser;
+import com.seckill.demo.redis.RedisService;
 import com.seckill.demo.vo.GoodsVo;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring5.context.webflux.SpringWebFluxContext;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,22 +30,18 @@ public class GoodsController {
     private static Logger log = LoggerFactory.getLogger(GoodsController.class);
 
     @Autowired
-    private MiaoshaUserService miaoshaUserService;
+    private RedisService redisService;
 
     @Autowired
     private GoodsService goodsService;
 
-    @RequestMapping("/to_list")
-    public String toLogin(Model model, HttpServletRequest request,
-                            @CurrentUser MiaoShaUser user
-//                          @CookieValue(value=MiaoshaUserService.COOKIE_NAME_TOKEN,required = false) String cookieToken,
-//                          @RequestParam(value = MiaoshaUserService.COOKIE_NAME_TOKEN,required = false) String paramToken
+    @Autowired
+    private ThymeleafViewResolver thymeleafViewResolver;
+
+    @RequestMapping(value = "/to_list", produces = "text/html")
+    @ResponseBody
+    public String toLogin(Model model, HttpServletRequest request, HttpServletResponse response
                             ){
-//        if(StringUtils.isEmpty(cookieToken)&&StringUtils.isEmpty(paramToken)){
-//            return "login";
-//        }
-//        String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
-//        MiaoShaUser user = miaoshaUserService.getByToken(response, token);
         MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
         if(user1 == null){ //未登录则返回登陆页面
             return "login.html";
@@ -50,17 +50,36 @@ public class GoodsController {
         //查询商品列表
         List<GoodsVo> goodsList = goodsService.listGoodsVo();
         model.addAttribute("goodsList",goodsList);
-        return "goods_list";
+        //取缓存中的html
+        String html = (String) redisService.get("goods_list");
+        if(!StringUtils.isEmpty(html)){
+            return html;
+        }
+        //手动渲染
+        WebContext webContext = new WebContext(request,response,request.getServletContext(),request.getLocale(),model.asMap());
+        html = thymeleafViewResolver.getTemplateEngine().process("goods_list",webContext);
+        if(!StringUtils.isEmpty(html)){
+            redisService.set("goods_list",html, (long) 60);
+        }
+
+        return html;
     }
 
-    @RequestMapping("/to_detail/{goodsId}")
-    public String detail(Model model, HttpServletRequest request,
+    @RequestMapping(value = "/to_detail/{goodsId}",produces = "text/html")
+    @ResponseBody
+    public String detail(Model model, HttpServletRequest request,HttpServletResponse response,
                          @PathVariable("goodsId") long goodsId){
         MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
         if(user1 == null){ //未登录则返回登陆页面
             return "login.html";
         }
         model.addAttribute("user",user1);
+
+        String html = (String) redisService.get("goods_detail,id="+goodsId);
+        if(!StringUtils.isEmpty(html)){
+            return html;
+        }
+
         //拿到商品的信息
         GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
         model.addAttribute("goods",goods);
@@ -83,9 +102,16 @@ public class GoodsController {
             miaoshaStatus = 1;
             remainSec = 0;
         }
-
         model.addAttribute("miaoshaStatus",miaoshaStatus);
         model.addAttribute("remainSeconds",remainSec);
-        return "goods_detail";
+//        return "goods_detail";
+
+        //手动渲染
+        WebContext webContext = new WebContext(request,response,request.getServletContext(),request.getLocale(),model.asMap());
+        html = thymeleafViewResolver.getTemplateEngine().process("goods_detail",webContext);
+        if(!StringUtils.isEmpty(html)){
+            redisService.set("goods_detail,id=" + goodsId,html, (long) 5);
+        }
+        return html;
     }
 }

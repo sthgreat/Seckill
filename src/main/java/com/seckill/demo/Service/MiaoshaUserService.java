@@ -42,7 +42,7 @@ public class MiaoshaUserService {
         return miaoshaUserDao.getById(id);
     }
 
-    public boolean login(LoginVo loginVo, HttpServletResponse response) {
+    public String login(LoginVo loginVo, HttpServletResponse response) {
         if(loginVo == null){
             throw new GlobalException(CodeMsg.SERVER_ERROR);
         }
@@ -62,7 +62,7 @@ public class MiaoshaUserService {
         }
         String token = UUIDUtil.uuid();
         addCookie(response, token, user);
-        return true;
+        return token;
     }
 
     private void addCookie(HttpServletResponse response,String token, MiaoShaUser user){
