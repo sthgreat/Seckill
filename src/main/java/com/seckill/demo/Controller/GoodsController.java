@@ -1,11 +1,13 @@
 package com.seckill.demo.Controller;
 
 import com.seckill.demo.Interceptor.CurrentUser;
+import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.MiaoshaUserService;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.redis.RedisService;
+import com.seckill.demo.vo.GoodsDetailVo;
 import com.seckill.demo.vo.GoodsVo;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.logging.LogFactory;
@@ -47,14 +49,14 @@ public class GoodsController {
             return "login.html";
         }
         model.addAttribute("user",user1);
-        //查询商品列表
-        List<GoodsVo> goodsList = goodsService.listGoodsVo();
-        model.addAttribute("goodsList",goodsList);
         //取缓存中的html
         String html = (String) redisService.get("goods_list");
         if(!StringUtils.isEmpty(html)){
             return html;
         }
+        //查询商品列表
+        List<GoodsVo> goodsList = goodsService.listGoodsVo();
+        model.addAttribute("goodsList",goodsList);
         //手动渲染
         WebContext webContext = new WebContext(request,response,request.getServletContext(),request.getLocale(),model.asMap());
         html = thymeleafViewResolver.getTemplateEngine().process("goods_list",webContext);
@@ -65,13 +67,49 @@ public class GoodsController {
         return html;
     }
 
-    @RequestMapping(value = "/to_detail/{goodsId}",produces = "text/html")
+    @RequestMapping(value = "/detail/{goodsId}")
     @ResponseBody
-    public String detail(Model model, HttpServletRequest request,HttpServletResponse response,
+    public Result<GoodsDetailVo> detail(Model model, HttpServletRequest request, HttpServletResponse response,
+                                        @PathVariable("goodsId") long goodsId){
+        MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
+        if(user1 == null){
+            return Result.error(CodeMsg.MOBILE_NOT_EXIST);
+        }
+        //拿到商品的信息
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+
+        long startAt = goods.getStartDate().getTime();
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();
+        int miaoshaStatus = 0;
+        int remainSec = 0;
+        if(now<startAt){//秒杀未开始
+            miaoshaStatus = 0;
+            remainSec = (int)(startAt - now)/1000;
+        }else if(now>endAt){//秒杀已经结束
+            miaoshaStatus = 2;
+            remainSec = -1;
+        }else {//秒杀进行中
+            miaoshaStatus = 1;
+            remainSec = 0;
+        }
+        GoodsDetailVo goodsDetailVo = new GoodsDetailVo();
+        goodsDetailVo.setGoods(goods);
+        goodsDetailVo.setMiaoshaStatus(miaoshaStatus);
+        goodsDetailVo.setRemainSec(remainSec);
+        goodsDetailVo.setMiaoShaUser(user1);
+
+        return Result.success(goodsDetailVo);
+    }
+
+    @RequestMapping(value = "/to_detail2/{goodsId}",produces = "text/html")
+    @ResponseBody
+    public String detail2(Model model, HttpServletRequest request,HttpServletResponse response,
                          @PathVariable("goodsId") long goodsId){
         MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
         if(user1 == null){ //未登录则返回登陆页面
-            return "login.html";
+            WebContext webContext = new WebContext(request,response,request.getServletContext(),request.getLocale());
+            return thymeleafViewResolver.getTemplateEngine().process("login",webContext);
         }
         model.addAttribute("user",user1);
 

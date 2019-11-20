@@ -172,7 +172,7 @@ function doMiaosha(path){
 
 function render(detail){
 	var miaoshaStatus = detail.miaoshaStatus;
-	var  remainSeconds = detail.remainSeconds;
+	var remainSeconds = detail.remainSec;
 	var goods = detail.goods;
 	var user = detail.user;
 	if(user){
@@ -200,7 +200,7 @@ function getDetail(){
 		url:"/goods/detail/"+goodsId,
 		type:"GET",
 		success:function(data){
-			if(data.code == 0){
+			if(data.code === 0){
 				render(data.data);
 			}else{
 				layer.msg(data.msg);
@@ -223,7 +223,7 @@ function countDown(){
 			$("#remainSeconds").val(remainSeconds - 1);
 			countDown();
 		},1000);
-	}else if(remainSeconds == 0){//秒杀进行中
+	}else if(remainSeconds === 0){//秒杀进行中
 		$("#buyButton").attr("disabled", false);
 		if(timeout){
 			clearTimeout(timeout);
