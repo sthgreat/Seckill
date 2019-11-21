@@ -46,7 +46,8 @@ public class GoodsController {
                             ){
         MiaoShaUser user1 = (MiaoShaUser) request.getAttribute("current_user");
         if(user1 == null){ //未登录则返回登陆页面
-            return "login.html";
+            WebContext webContext = new WebContext(request,response,request.getServletContext(),request.getLocale(),model.asMap());
+            return thymeleafViewResolver.getTemplateEngine().process("login",webContext);
         }
         model.addAttribute("user",user1);
         //取缓存中的html
