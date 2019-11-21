@@ -51,7 +51,7 @@
      <tr>  
         <td>秒杀开始时间</td>  
         <td id="startTime"></td>
-        <td >	
+        <td>
         	<input type="hidden" id="remainSeconds" />
         	<span id="miaoshaTip"></span>
         </td>
@@ -150,15 +150,16 @@ function getMiaoshaResult(goodsId){
 
 function doMiaosha(path){
 	$.ajax({
-		url:"/miaosha/"+path+"/do_miaosha",
+		// url:"/miaosha/"+path+"/do_miaosha",
+        url:"/miaosha/do_miaosha",
 		type:"POST",
 		data:{
 			goodsId:$("#goodsId").val()
 		},
 		success:function(data){
 			if(data.code == 0){
-				//window.location.href="/order_detail.htm?orderId="+data.data.id;
-				getMiaoshaResult($("#goodsId").val());
+				window.location.href="/order_detail.htm?orderId="+data.data.id;
+				// getMiaoshaResult($("#goodsId").val());
 			}else{
 				layer.msg(data.msg);
 			}
@@ -200,7 +201,7 @@ function getDetail(){
 		url:"/goods/detail/"+goodsId,
 		type:"GET",
 		success:function(data){
-			if(data.code === 0){
+			if(data.code == 0){
 				render(data.data);
 			}else{
 				layer.msg(data.msg);
@@ -223,7 +224,7 @@ function countDown(){
 			$("#remainSeconds").val(remainSeconds - 1);
 			countDown();
 		},1000);
-	}else if(remainSeconds === 0){//秒杀进行中
+	}else if(remainSeconds == 0){//秒杀进行中
 		$("#buyButton").attr("disabled", false);
 		if(timeout){
 			clearTimeout(timeout);

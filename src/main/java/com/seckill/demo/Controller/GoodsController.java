@@ -81,6 +81,8 @@ public class GoodsController {
         long startAt = goods.getStartDate().getTime();
         long endAt = goods.getEndDate().getTime();
         long now = System.currentTimeMillis();
+        log.info(startAt + " " +endAt + " "+now);
+        log.info(String.valueOf(now>endAt));
         int miaoshaStatus = 0;
         int remainSec = 0;
         if(now<startAt){//秒杀未开始
@@ -93,6 +95,7 @@ public class GoodsController {
             miaoshaStatus = 1;
             remainSec = 0;
         }
+        log.info(""+ remainSec);
         GoodsDetailVo goodsDetailVo = new GoodsDetailVo();
         goodsDetailVo.setGoods(goods);
         goodsDetailVo.setMiaoshaStatus(miaoshaStatus);
