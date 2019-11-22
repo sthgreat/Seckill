@@ -1,5 +1,6 @@
 package com.seckill.demo.Controller;
 
+import com.seckill.demo.RabbitMQ.MQSender;
 import com.seckill.demo.Result.CodeMsg;
 import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.GoodsService;
@@ -23,6 +24,9 @@ import java.util.List;
 @Controller
 @RequestMapping("/demo")
 public class SampleController {
+    @Autowired
+    private MQSender mqSender;
+
     @Autowired
     private UserService userService;
 
@@ -64,6 +68,14 @@ public class SampleController {
         User result = (User) redisTemplate.opsForValue().get("345");
         return Result.success(result);
     }
+
+    @RequestMapping("/mq")
+    @ResponseBody
+    public Result<String> mq(){
+        mqSender.send("hello!man!");
+        return Result.success("H");
+    }
+
 
     @RequestMapping("/redis/get")
     @ResponseBody

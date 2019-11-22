@@ -48,9 +48,6 @@ public class RedisConfig extends CachingConfigurerSupport {
         return redisTemplate;
     }
 
-
-
-
 //    @Bean(name = "redisTemplate")
 //    @SuppressWarnings("unchecked")
 //    @ConditionalOnMissingBean(name = "redisTemplate")
