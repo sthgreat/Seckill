@@ -20,4 +20,8 @@ public class MQSender {
         amqpTemplate.convertAndSend(MQConfig.QUEUE,msg);
     }
 
+    public void sendMiaoshaMessage(MiaoshaMessage mm) {
+        String msg = Util.beanToString(mm);
+        amqpTemplate.convertAndSend(MQConfig.MIAOSHA_QUEUE, msg);
+    }
 }

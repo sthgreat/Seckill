@@ -30,8 +30,13 @@ public class RedisService {//分库及其他操作
         return valueOperations.get(key);
     }
 
-    public void delete(String key){
-        RedisOperations<String, Object> Operations = redisTemplate.opsForValue().getOperations();
-        Operations.delete(key);
+    public Object decr(String key){
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        valueOperations.decrement(key);
+        return valueOperations.get(key);
+    }
+
+    public boolean exist(String key){
+        return redisTemplate.hasKey(key);
     }
 }

@@ -158,8 +158,8 @@ function doMiaosha(path){
 		},
 		success:function(data){
 			if(data.code == 0){
-				window.location.href="/order_detail.htm?orderId="+data.data.id;
-				// getMiaoshaResult($("#goodsId").val());
+				// window.location.href="/order_detail.htm?orderId="+data.data.id;
+				getMiaoshaResult($("#goodsId").val());
 			}else{
 				layer.msg(data.msg);
 			}
