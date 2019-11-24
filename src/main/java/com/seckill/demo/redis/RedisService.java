@@ -39,4 +39,8 @@ public class RedisService {//分库及其他操作
     public boolean exist(String key){
         return redisTemplate.hasKey(key);
     }
+
+    public void delete(String s) {
+        redisTemplate.delete(s);
+    }
 }

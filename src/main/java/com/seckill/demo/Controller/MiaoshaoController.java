@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/miaosha")
@@ -38,6 +40,21 @@ public class MiaoshaoController implements InitializingBean {
     private RedisService redisService;
     @Autowired
     private MQSender sender;
+
+    private Map<Long,Boolean> localOverMap = new HashMap<>();
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        //系统初始化时启动该服务
+        List<GoodsVo> goodsList = goodsService.listGoodsVo();
+        if(goodsList == null){
+            return;
+        }
+        for(GoodsVo goods : goodsList){
+            redisService.set("goodCount,id="+goods.getId(), goods.getStockCount(), (long) 3000000);
+            localOverMap.put(goods.getId(), false);
+        }
+    }
 
     @RequestMapping(value = "/do_miaosha2",method = RequestMethod.POST)
     public Result<OrderInfo> miaosha(Model model, HttpServletRequest request,
@@ -73,9 +90,16 @@ public class MiaoshaoController implements InitializingBean {
         if(user == null){
             return Result.error(CodeMsg.SESSION_ERROR);
         }
+        //内存标记，减少redis访问
+        boolean over = localOverMap.get(goodsId);
+        if(over){
+            return Result.error(CodeMsg.NOMORE_MIAOSHA);
+        }
+
         //预减库存
         Integer stock = (Integer) redisService.decr("goodCount,id="+goodsId);
         if(stock<0){
+            localOverMap.put(goodsId,true);
             return Result.error(CodeMsg.NOMORE_MIAOSHA);
         }
         //判断重复秒杀
@@ -89,18 +113,6 @@ public class MiaoshaoController implements InitializingBean {
         mm.setGoodsId(goodsId);
         sender.sendMiaoshaMessage(mm);
         return Result.success(0); //排队中
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        //系统初始化时启动该服务
-        List<GoodsVo> goodsList = goodsService.listGoodsVo();
-        if(goodsList == null){
-            return;
-        }
-        for(GoodsVo goods : goodsList){
-            redisService.set("goodCount,id="+goods.getId(), goods.getStockCount(), (long) 30000);
-        }
     }
 
     //orderId：成功,-1：库存不足,0：排队中
