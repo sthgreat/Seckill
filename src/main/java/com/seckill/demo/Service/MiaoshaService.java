@@ -2,6 +2,8 @@ package com.seckill.demo.Service;
 
 import com.seckill.demo.Dao.GoodsDao;
 import com.seckill.demo.Dao.OrderDao;
+import com.seckill.demo.Utils.MD5Util;
+import com.seckill.demo.Utils.UUIDUtil;
 import com.seckill.demo.domain.Goods;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.domain.MiaoshaOrder;
@@ -56,5 +58,19 @@ public class MiaoshaService {
 
     private boolean getGoodsOver(long goodsId) {
         return redisService.exist("good_status:" + goodsId);
+    }
+
+    public boolean checkPath(MiaoShaUser user, long goodsId, String path) {
+        if(path == null){
+            return false;
+        }
+        String pathOld = (String) redisService.get("miaosha_path,"+user.getId()+"_"+goodsId);
+        return path.equals(pathOld);
+    }
+
+    public String createMiaoshaPath(MiaoShaUser user,long goodsId) {
+        String str = MD5Util.md5(UUIDUtil.uuid()+"123456");
+        redisService.set("miaosha_path,"+user.getId()+"_"+goodsId, str, (long) 60);
+        return str;
     }
 }

@@ -7,6 +7,8 @@ import com.seckill.demo.Result.Result;
 import com.seckill.demo.Service.GoodsService;
 import com.seckill.demo.Service.MiaoshaService;
 import com.seckill.demo.Service.OrderService;
+import com.seckill.demo.Utils.MD5Util;
+import com.seckill.demo.Utils.UUIDUtil;
 import com.seckill.demo.domain.MiaoShaUser;
 import com.seckill.demo.domain.MiaoshaOrder;
 import com.seckill.demo.domain.OrderInfo;
@@ -17,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -82,13 +81,18 @@ public class MiaoshaoController implements InitializingBean {
     }
 
     //改造后
-    @RequestMapping(value = "/do_miaosha",method = RequestMethod.POST)
+    @RequestMapping(value = "/{path}/do_miaosha",method = RequestMethod.POST)
     public Result<Integer> miaosha(HttpServletRequest request,Model model,
-                                     @RequestParam(value = "goodsId") long goodsId){
+                                     @PathVariable("path") String path,@RequestParam(value = "goodsId") long goodsId){
         MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
         model.addAttribute("user",user);
         if(user == null){
             return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        //验证path
+        boolean check = miaoshaService.checkPath(user,goodsId,path);
+        if(!check){
+            return Result.error(CodeMsg.REQUEST_ILLEGAL);
         }
         //内存标记，减少redis访问
         boolean over = localOverMap.get(goodsId);
@@ -127,5 +131,17 @@ public class MiaoshaoController implements InitializingBean {
         }
         long result = miaoshaService.getMiaoshaResult(user.getId(),goodsId);
         return Result.success(result);
+    }
+
+    @RequestMapping(value = "/path",method = RequestMethod.GET)
+    public Result<String> getMiaoshaPath(HttpServletRequest request, Model model,
+                                         @RequestParam(value = "goodsId") long goodsId) {
+        MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
+        model.addAttribute("user", user);
+        if (user == null) {
+            return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        String path = miaoshaService.createMiaoshaPath(user,goodsId);
+        return Result.success(path);
     }
 }
