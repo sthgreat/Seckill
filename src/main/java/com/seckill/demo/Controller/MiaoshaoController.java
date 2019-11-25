@@ -14,6 +14,7 @@ import com.seckill.demo.domain.MiaoshaOrder;
 import com.seckill.demo.domain.OrderInfo;
 import com.seckill.demo.redis.RedisService;
 import com.seckill.demo.vo.GoodsVo;
+import com.sun.deploy.net.HttpResponse;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
@@ -21,7 +22,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +140,7 @@ public class MiaoshaoController implements InitializingBean {
     }
 
     @RequestMapping(value = "/path",method = RequestMethod.GET)
+    @ResponseBody
     public Result<String> getMiaoshaPath(HttpServletRequest request, Model model,
                                          @RequestParam(value = "goodsId") long goodsId) {
         MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
@@ -143,5 +150,27 @@ public class MiaoshaoController implements InitializingBean {
         }
         String path = miaoshaService.createMiaoshaPath(user,goodsId);
         return Result.success(path);
+    }
+
+    @RequestMapping(value = "/verifyCode",method = RequestMethod.GET)
+    @ResponseBody
+    public Result<String> getMiaoshaVerifyCode(HttpServletRequest request, Model model,
+                                               HttpServletResponse response, @RequestParam(value = "goodsId") long goodsId) {
+        MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
+        model.addAttribute("user", user);
+        if (user == null) {
+            return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        BufferedImage img = miaoshaService.createVerifyCode(user, goodsId);
+        try {
+            OutputStream out = response.getOutputStream();
+            ImageIO.write(img,"JPEG",out);
+            out.flush();
+            out.close();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Result.error(CodeMsg.MIAOSHA_FAIL);
+        }
     }
 }
