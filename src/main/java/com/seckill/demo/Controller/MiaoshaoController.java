@@ -1,5 +1,6 @@
 package com.seckill.demo.Controller;
 
+import com.seckill.demo.Access.AccessLimit;
 import com.seckill.demo.RabbitMQ.MQSender;
 import com.seckill.demo.RabbitMQ.MiaoshaMessage;
 import com.seckill.demo.Result.CodeMsg;
@@ -79,17 +80,17 @@ public class MiaoshaoController implements InitializingBean {
         if(order!=null){
             return Result.error(CodeMsg.NOMORE_MIAOSHA);
         }
-
         //减库存，下订单，写入秒杀订单，需要事务
         OrderInfo orderInfo = miaoshaService.miaosha(user, good);
         return Result.success(orderInfo);
-
     }
 
     //改造后
     @RequestMapping(value = "/{path}/do_miaosha",method = RequestMethod.POST)
+    @ResponseBody
     public Result<Integer> miaosha(HttpServletRequest request,Model model,
-                                     @PathVariable("path") String path,@RequestParam(value = "goodsId") long goodsId){
+                                     @PathVariable("path") String path,
+                                   @RequestParam(value = "goodsId") long goodsId){
         MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
         model.addAttribute("user",user);
         if(user == null){
@@ -126,7 +127,8 @@ public class MiaoshaoController implements InitializingBean {
     }
 
     //orderId：成功,-1：库存不足,0：排队中
-    @RequestMapping(value = "/result", method = RequestMethod.POST)
+    @AccessLimit(seconds=5, maxCount=10,needLogin=true)
+    @RequestMapping(value = "/result", method = RequestMethod.GET)
     @ResponseBody
     public Result<Long> miaoshaResult(HttpServletRequest request,Model model,
                                          @RequestParam(value = "goodsId") long goodsId){
@@ -139,14 +141,33 @@ public class MiaoshaoController implements InitializingBean {
         return Result.success(result);
     }
 
+    @AccessLimit(seconds=5, maxCount=5,needLogin=true)
     @RequestMapping(value = "/path",method = RequestMethod.GET)
     @ResponseBody
-    public Result<String> getMiaoshaPath(HttpServletRequest request, Model model,
-                                         @RequestParam(value = "goodsId") long goodsId) {
+    public Result<String> getMiaoshaPath(HttpServletRequest request,
+                                         @RequestParam(value = "goodsId") long goodsId,
+                                         @RequestParam("verifyCode") int verifyCode) {
         MiaoShaUser user = (MiaoShaUser) request.getAttribute("current_user");
-        model.addAttribute("user", user);
-        if (user == null) {
-            return Result.error(CodeMsg.SESSION_ERROR);
+//        if (user == null) {
+//            return Result.error(CodeMsg.SESSION_ERROR);
+//        }
+
+        //查询访问次数
+//        String uri = request.getRequestURI();
+//        String key = uri + "_" + user.getId();
+//        Integer count = (Integer) redisService.get("Access_count,"+key);
+//        if(count == null){
+//            redisService.set("Access_count,"+key, 1 ,(long)5);
+//        }else if(count < 5){
+//            redisService.incr("Access_count,"+key);
+//        }else{
+//            return Result.error(CodeMsg.ACCESS_LIMIT_REACH);
+//        }
+
+
+        boolean check = miaoshaService.checkVerifyCode(user,goodsId,verifyCode);
+        if(!check){
+            return Result.error(CodeMsg.REQUEST_ILLEGAL);
         }
         String path = miaoshaService.createMiaoshaPath(user,goodsId);
         return Result.success(path);

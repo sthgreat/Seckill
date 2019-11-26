@@ -1,5 +1,6 @@
 package com.seckill.demo.config;
 
+import com.seckill.demo.Interceptor.AccessInterceptor;
 import com.seckill.demo.Interceptor.AuthenticationInterceptor;
 import com.seckill.demo.Interceptor.CurrentUserMethodArgumentResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
 
+    @Autowired
+    private AccessInterceptor accessInterceptor;
+
     @Bean
     public CurrentUserMethodArgumentResolver currentUserMethodArgumentResolver(){
         return new CurrentUserMethodArgumentResolver();
@@ -28,6 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticationInterceptor).addPathPatterns("/**");
+//        registry.addInterceptor(authenticationInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(accessInterceptor).addPathPatterns("/**");
     }
 }

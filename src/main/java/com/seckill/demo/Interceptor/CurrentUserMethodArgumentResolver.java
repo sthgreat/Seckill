@@ -1,5 +1,6 @@
 package com.seckill.demo.Interceptor;
 
+import com.seckill.demo.Access.UserContext;
 import com.seckill.demo.Service.MiaoshaUserService;
 import com.seckill.demo.domain.MiaoShaUser;
 import org.springframework.core.MethodParameter;
@@ -21,6 +22,6 @@ public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentR
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        return  (MiaoShaUser) webRequest.getAttribute(MiaoshaUserService.COOKIE_NAME_TOKEN, RequestAttributes.SCOPE_REQUEST);
+        return UserContext.getUser();
     }
 }

@@ -113,7 +113,7 @@ public class MiaoshaService {
         g.drawString(verifyCode, 8, 24);
         g.dispose();
         //把验证码存到redis中
-        int rnd = calc(verifyCode);
+        Integer rnd = calc(verifyCode);
         redisService.set("VerifyCode,"+user.getId()+","+goodsId, rnd,(long) 60);
         //输出图片
         return image;
@@ -142,5 +142,17 @@ public class MiaoshaService {
         char op2 = ops[rdm.nextInt(3)];
         String exp = ""+ num1 + op1 + num2 + op2 + num3;
         return exp;
+    }
+
+    public boolean checkVerifyCode(MiaoShaUser user, long goodsId, int verifyCode) {
+        if(user == null || goodsId<=0){
+            return false;
+        }
+        Integer codeOld = (Integer) redisService.get("VerifyCode,"+user.getId()+","+goodsId);
+        if(codeOld == null || codeOld - verifyCode != 0){
+            return false;
+        }
+        redisService.delete("VerifyCode,"+user.getId()+","+goodsId);
+        return true;
     }
 }
